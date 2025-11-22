@@ -44,8 +44,18 @@ jobs:
           # Extract all library files from the APK
           unzip -j sherpa.apk "lib/arm64-v8a/*.so" -d app/src/main/jniLibs/arm64-v8a/
           
+          # Create assets directory
+          mkdir -p app/src/main/assets/models
+          
+          # Extract model assets
+          # The assets in APK are under 'assets/', we need to extract them and move to app/src/main/assets/models/
+          unzip -q sherpa.apk "assets/sherpa-ncnn-streaming-zipformer-bilingual-zh-en-2023-02-13/*" -d temp_assets
+          mv temp_assets/assets/sherpa-ncnn-streaming-zipformer-bilingual-zh-en-2023-02-13 app/src/main/assets/models/
+          rm -rf temp_assets
+          
           # Verify files exist
           ls -l app/src/main/jniLibs/arm64-v8a/
+          ls -R app/src/main/assets/models/
 
       - name: Build Release APK
         run: ./gradlew assembleRelease
