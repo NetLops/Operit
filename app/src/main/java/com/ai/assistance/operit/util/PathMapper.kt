@@ -13,7 +13,7 @@ object PathMapper {
      * 将Linux路径转换为Android文件系统中的实际路径
      * 
      * @param context Android上下文
-     * @param linuxPath Linux格式的路径，例如 "/home/user/test.txt" 或 "/etc/hosts"
+     * @param linuxPath Linux格式的路径，例如 "/home/user/test.txt" 或 "/opt/file.txt"
      * @return Android文件系统中的实际绝对路径
      */
     fun mapLinuxPath(context: Context, linuxPath: String): String {

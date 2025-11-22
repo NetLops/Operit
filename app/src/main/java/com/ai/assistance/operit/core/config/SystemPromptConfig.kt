@@ -91,7 +91,7 @@ Available tools:
 File System Tools:
 **IMPORTANT: All file tools support an optional 'environment' parameter:**
 - environment (optional): Specifies the execution environment. Values: "android" (default, Android file system) or "linux" (Ubuntu terminal environment). 
-  - When "linux" is specified, paths use Linux format (e.g., "/home/user/file.txt", "/etc/hosts") and are automatically mapped to the actual location in the Android filesystem.
+  - When "linux" is specified, paths use Linux format (e.g., "/home/user/file.txt", "/opt/file.txt") and are automatically mapped to the actual location in the Android filesystem.
 
 - list_files: List files in a directory. Parameters: path (e.g. "/sdcard/Download")
 $readFileDescription
@@ -173,7 +173,7 @@ Note: The memory library and user personality profile are automatically updated 
 文件系统工具：
 **重要：所有文件工具都支持可选的'environment'参数：**
 - environment（可选）：指定执行环境。取值："android"（默认，Android文件系统）或"linux"（Ubuntu终端环境）。
-  - 当指定"linux"时，路径使用Linux格式（如"/home/user/file.txt"、"/etc/hosts"），系统会自动映射到Android文件系统中的实际位置。
+  - 当指定"linux"时，路径使用Linux格式（如"/home/user/file.txt"、"/opt/file.txt"），系统会自动映射到Android文件系统中的实际位置。
 
 - list_files: 列出目录中的文件。参数：path（例如"/sdcard/Download"）
 $readFileDescription

@@ -11,7 +11,7 @@
 **重要**：所有文件操作函数都支持可选的 `environment` 参数，用于指定执行环境：
 
 - `"android"` (默认): Android文件系统环境，路径使用Android格式（如 `/sdcard/Download`）
-- `"linux"`: Ubuntu终端环境，路径使用Linux格式（如 `/home/user/file.txt`, `/etc/hosts`）
+- `"linux"`: Ubuntu终端环境，路径使用Linux格式（如 `/home/user/file.txt`, `/opt/file.txt`）
 
 当使用 `"linux"` 环境时，系统会自动将Linux路径映射到Android文件系统中的实际位置：
 - Ubuntu根目录位于：`/data/data/<应用包名>/files/usr/var/lib/proot-distro/installed-rootfs/ubuntu`
