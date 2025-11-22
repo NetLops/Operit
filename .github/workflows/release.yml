@@ -41,8 +41,8 @@ jobs:
           # Download the APK containing the library
           curl -L -o sherpa.apk https://github.com/k2-fsa/sherpa-ncnn/releases/download/v2.1.15/sherpa-ncnn-2.1.15-cpu-arm64-v8a-bilingual-en-zh.apk
           
-          # Extract the specific library files
-          unzip -j sherpa.apk lib/arm64-v8a/libsherpa-ncnn-jni.so lib/arm64-v8a/libncnn.so -d app/src/main/jniLibs/arm64-v8a/
+          # Extract all library files from the APK
+          unzip -j sherpa.apk "lib/arm64-v8a/*.so" -d app/src/main/jniLibs/arm64-v8a/
           
           # Verify files exist
           ls -l app/src/main/jniLibs/arm64-v8a/
