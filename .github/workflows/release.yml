@@ -57,8 +57,9 @@ jobs:
           ls -l app/src/main/jniLibs/arm64-v8a/
           ls -R app/src/main/assets/models/
 
-      - name: Configure Terminal Module to Skip Stripping libsudo.so
+      - name: Configure Modules to Skip Stripping libsudo.so
         run: |
+          # Configure terminal module
           if [ -f terminal/build.gradle.kts ]; then
             echo "" >> terminal/build.gradle.kts
             echo 'android { packaging { jniLibs { keepDebugSymbols.add("**/libsudo.so") } } }' >> terminal/build.gradle.kts
@@ -70,6 +71,18 @@ jobs:
           else
             echo "Terminal build file not found!"
             ls -R terminal
+            exit 1
+          fi
+          
+          # Configure app module to skip stripping when merging native libs
+          if [ -f app/build.gradle.kts ]; then
+            # Find the packaging block and inject keepDebugSymbols
+            # Since app/build.gradle.kts already has a packaging block, we need to be more careful
+            # We'll inject it within the existing jniLibs block if it exists, or create one
+            sed -i '/packaging {/a\        jniLibs {\n            keepDebugSymbols.add("**/libsudo.so")\n        }' app/build.gradle.kts
+            echo "Added keepDebugSymbols for libsudo.so to app/build.gradle.kts"
+          else
+            echo "App build file not found!"
             exit 1
           fi
 
