@@ -57,6 +57,22 @@ jobs:
           ls -l app/src/main/jniLibs/arm64-v8a/
           ls -R app/src/main/assets/models/
 
+      - name: Configure Terminal Module to Skip Stripping libsudo.so
+        run: |
+          if [ -f terminal/build.gradle.kts ]; then
+            echo "" >> terminal/build.gradle.kts
+            echo 'android { packaging { jniLibs { keepDebugSymbols.add("**/libsudo.so") } } }' >> terminal/build.gradle.kts
+            echo "Added keepDebugSymbols for libsudo.so to terminal/build.gradle.kts"
+          elif [ -f terminal/build.gradle ]; then
+            echo "" >> terminal/build.gradle
+            echo 'android { packagingOptions { doNotStrip "**/libsudo.so" } }' >> terminal/build.gradle
+            echo "Added doNotStrip for libsudo.so to terminal/build.gradle"
+          else
+            echo "Terminal build file not found!"
+            ls -R terminal
+            exit 1
+          fi
+
       - name: Build Release APK
         run: ./gradlew assembleRelease
 
