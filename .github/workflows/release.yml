@@ -73,6 +73,26 @@ jobs:
             exit 1
           fi
 
+      - name: Fix Build Warnings
+        run: |
+          # Fix 1: Remove deprecated 'package' attribute from terminal AndroidManifest.xml
+          if [ -f terminal/src/main/AndroidManifest.xml ]; then
+            sed -i 's/package="com.ai.assistance.operit.terminal"//' terminal/src/main/AndroidManifest.xml
+            echo "Removed deprecated package attribute from terminal/src/main/AndroidManifest.xml"
+          else
+            echo "Warning: terminal/src/main/AndroidManifest.xml not found, skipping fix."
+          fi
+
+          # Fix 2: Suppress C++ warnings in MNN build
+          if [ -f mnn/build.gradle.kts ]; then
+            # Inject -w flag to suppress all warnings
+            # We look for the line 'cppFlags += listOf("-std=c++17", "-fno-emulated-tls")' and append "-w" to it
+            sed -i 's/"-std=c++17", "-fno-emulated-tls"/"-std=c++17", "-fno-emulated-tls", "-w"/' mnn/build.gradle.kts
+            echo "Injected -w flag into mnn/build.gradle.kts"
+          else
+            echo "Warning: mnn/build.gradle.kts not found, skipping fix."
+          fi
+
       - name: Build Release APK
         run: ./gradlew assembleRelease
 
