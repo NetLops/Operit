@@ -1,0 +1,120 @@
+name: Build Debug APK
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - me  # 用于测试的分支
+  pull_request:
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  build-debug:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Create local.properties
+        run: |
+          echo "GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}" >> local.properties
+          echo "GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}" >> local.properties
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Download and Extract Sherpa NCNN Library
+        run: |
+          # Create target directory
+          mkdir -p app/src/main/jniLibs/arm64-v8a
+          
+          # Download the APK containing the library
+          curl -L -o sherpa.apk https://github.com/k2-fsa/sherpa-ncnn/releases/download/v2.1.15/sherpa-ncnn-2.1.15-cpu-arm64-v8a-bilingual-en-zh.apk
+          
+          # Extract all library files from the APK
+          unzip -j sherpa.apk "lib/arm64-v8a/*.so" -d app/src/main/jniLibs/arm64-v8a/
+          
+          # Create assets directory
+          mkdir -p app/src/main/assets/models
+          
+          # Extract model assets
+          unzip -q sherpa.apk "assets/sherpa-ncnn-streaming-zipformer-bilingual-zh-en-2023-02-13/*" -d temp_assets
+          mv temp_assets/assets/sherpa-ncnn-streaming-zipformer-bilingual-zh-en-2023-02-13 app/src/main/assets/models/
+          rm -rf temp_assets
+          
+          # Verify files exist
+          ls -l app/src/main/jniLibs/arm64-v8a/
+          ls -R app/src/main/assets/models/
+
+      - name: Configure Modules to Skip Stripping libsudo.so
+        run: |
+          # Configure terminal module
+          if [ -f terminal/build.gradle.kts ]; then
+            echo "" >> terminal/build.gradle.kts
+            echo 'android { packaging { jniLibs { keepDebugSymbols.add("**/libsudo.so") } } }' >> terminal/build.gradle.kts
+            echo "Added keepDebugSymbols for libsudo.so to terminal/build.gradle.kts"
+          elif [ -f terminal/build.gradle ]; then
+            echo "" >> terminal/build.gradle
+            echo 'android { packagingOptions { doNotStrip "**/libsudo.so" } }' >> terminal/build.gradle
+            echo "Added doNotStrip for libsudo.so to terminal/build.gradle"
+          else
+            echo "Terminal build file not found!"
+            ls -R terminal
+            exit 1
+          fi
+          
+          # Configure app module
+          if [ -f app/build.gradle.kts ]; then
+            sed -i '/packaging {/a\        jniLibs {\n            keepDebugSymbols.add("**/libsudo.so")\n        }' app/build.gradle.kts
+            echo "Added keepDebugSymbols for libsudo.so to app/build.gradle.kts"
+          else
+            echo "App build file not found!"
+            exit 1
+          fi
+
+      - name: Fix Build Warnings
+        run: |
+          # Fix deprecated package attribute
+          if [ -f terminal/src/main/AndroidManifest.xml ]; then
+            sed -i 's/package="com.ai.assistance.operit.terminal"//' terminal/src/main/AndroidManifest.xml
+            echo "Removed deprecated package attribute from terminal/src/main/AndroidManifest.xml"
+          fi
+
+          # Suppress C++ warnings
+          if [ -f mnn/build.gradle.kts ]; then
+            sed -i 's/"-std=c++17", "-fno-emulated-tls"/"-std=c++17", "-fno-emulated-tls", "-w"/' mnn/build.gradle.kts
+            echo "Injected -w flag into mnn/build.gradle.kts"
+          fi
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug
+
+      - name: Upload Debug APK as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: operit-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
+
+      - name: Upload Debug APK to Release (Optional)
+        uses: softprops/action-gh-release@v1
+        if: github.event_name == 'workflow_dispatch'
+        with:
+          tag_name: debug-${{ github.run_number }}
+          name: Debug Build #${{ github.run_number }}
+          files: app/build/outputs/apk/debug/app-debug.apk
+          draft: true
+          prerelease: true
