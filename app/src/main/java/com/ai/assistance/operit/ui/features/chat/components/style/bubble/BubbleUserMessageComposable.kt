@@ -1,4 +1,3 @@
-
 package com.ai.assistance.operit.ui.features.chat.components.style.bubble
 
 import android.graphics.Bitmap
@@ -34,7 +33,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
@@ -54,38 +52,40 @@ import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun BubbleUserMessageComposable(
-    message: ChatMessage,
-    backgroundColor: Color,
-    textColor: Color
-) {
+fun BubbleUserMessageComposable(message: ChatMessage, backgroundColor: Color, textColor: Color) {
     val context = LocalContext.current
     val preferencesManager = remember { UserPreferencesManager.getInstance(context) }
     val displayPreferencesManager = remember { DisplayPreferencesManager.getInstance(context) }
     val customUserAvatarUri by preferencesManager.customUserAvatarUri.collectAsState(initial = null)
-    val globalUserAvatarUri by displayPreferencesManager.globalUserAvatarUri.collectAsState(initial = null)
+    val globalUserAvatarUri by
+            displayPreferencesManager.globalUserAvatarUri.collectAsState(initial = null)
     val globalUserName by displayPreferencesManager.globalUserName.collectAsState(initial = null)
     val showUserName by displayPreferencesManager.showUserName.collectAsState(initial = false)
-    val avatarShapePref by preferencesManager.avatarShape.collectAsState(initial = UserPreferencesManager.AVATAR_SHAPE_CIRCLE)
+    val avatarShapePref by
+            preferencesManager.avatarShape.collectAsState(
+                    initial = UserPreferencesManager.AVATAR_SHAPE_CIRCLE
+            )
     val avatarCornerRadius by preferencesManager.avatarCornerRadius.collectAsState(initial = 8f)
     val clipboardManager = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
 
     // 头像回退逻辑：优先使用角色卡专属头像，为空时使用全局头像
-    val avatarUri = remember(customUserAvatarUri, globalUserAvatarUri) {
-        when {
-            !customUserAvatarUri.isNullOrEmpty() -> customUserAvatarUri
-            !globalUserAvatarUri.isNullOrEmpty() -> globalUserAvatarUri
-            else -> null
-        }
-    }
-    val avatarShape = remember(avatarShapePref, avatarCornerRadius) {
-        if (avatarShapePref == UserPreferencesManager.AVATAR_SHAPE_SQUARE) {
-            RoundedCornerShape(avatarCornerRadius.dp)
-        } else {
-            CircleShape
-        }
-    }
+    val avatarUri =
+            remember(customUserAvatarUri, globalUserAvatarUri) {
+                when {
+                    !customUserAvatarUri.isNullOrEmpty() -> customUserAvatarUri
+                    !globalUserAvatarUri.isNullOrEmpty() -> globalUserAvatarUri
+                    else -> null
+                }
+            }
+    val avatarShape =
+            remember(avatarShapePref, avatarCornerRadius) {
+                if (avatarShapePref == UserPreferencesManager.AVATAR_SHAPE_SQUARE) {
+                    RoundedCornerShape(avatarCornerRadius.dp)
+                } else {
+                    CircleShape
+                }
+            }
 
     // 添加状态控制内容预览
     val showContentPreview = remember { mutableStateOf(false) }
@@ -103,44 +103,38 @@ fun BubbleUserMessageComposable(
     val replyInfo = parseResult.replyInfo
     val imageLinks = parseResult.imageLinks
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 0.dp, vertical = 4.dp)
-    ) {
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 0.dp, vertical = 4.dp)) {
         // Display reply info above attachments if present
         replyInfo?.let { reply ->
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 4.dp),
-                horizontalArrangement = Arrangement.End
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                    horizontalArrangement = Arrangement.End
             ) {
                 Surface(
-                    modifier = Modifier.padding(start = 32.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = RoundedCornerShape(8.dp, 8.dp, 2.dp, 8.dp)
+                        modifier = Modifier.padding(start = 32.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(8.dp, 8.dp, 2.dp, 8.dp)
                 ) {
                     Row(
-                        modifier = Modifier.padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            modifier = Modifier.padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Reply,
-                            contentDescription = context.getString(R.string.reply),
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(12.dp)
+                                imageVector = Icons.Default.Reply,
+                                contentDescription = context.getString(R.string.reply),
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(12.dp)
                         )
-                        
+
                         Spacer(modifier = Modifier.width(4.dp))
-                        
+
                         Text(
-                            text = "${reply.sender}: ${reply.content}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f)
+                                text = "${reply.sender}: ${reply.content}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f)
                         )
                     }
                 }
@@ -150,46 +144,49 @@ fun BubbleUserMessageComposable(
         // Display image links from pool
         if (imageLinks.isNotEmpty()) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 4.dp, start = 32.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalAlignment = Alignment.End
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp, start = 32.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.End
             ) {
                 imageLinks.forEach { imageLink ->
                     imageLink.bitmap?.let { bitmap ->
                         // 图片还在池子里，显示图片
                         Card(
-                            modifier = Modifier
-                                .size(120.dp)
-                                .clickable {
-                                    selectedImageBitmap.value = bitmap
-                                    showImagePreview.value = true
-                                },
-                            shape = RoundedCornerShape(8.dp),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                                modifier =
+                                        Modifier.size(120.dp).clickable {
+                                            selectedImageBitmap.value = bitmap
+                                            showImagePreview.value = true
+                                        },
+                                shape = RoundedCornerShape(8.dp),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                         ) {
                             Image(
-                                bitmap = bitmap.asImageBitmap(),
-                                contentDescription = context.getString(R.string.user_uploaded_image),
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
+                                    bitmap = bitmap.asImageBitmap(),
+                                    contentDescription =
+                                            context.getString(R.string.user_uploaded_image),
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
                             )
                         }
-                    } ?: run {
-                        // 图片已过期，显示为附件标签
-                        AttachmentTag(
-                            attachment = AttachmentData(
-                                id = imageLink.id,
-                                filename = context.getString(R.string.image_expired),
-                                type = "image/*",
-                                size = 0L,
-                                content = ""
-                            ),
-                            textColor = textColor,
-                            backgroundColor = backgroundColor
-                        )
                     }
+                            ?: run {
+                                // 图片已过期，显示为附件标签
+                                AttachmentTag(
+                                        attachment =
+                                                AttachmentData(
+                                                        id = imageLink.id,
+                                                        filename =
+                                                                context.getString(
+                                                                        R.string.image_expired
+                                                                ),
+                                                        type = "image/*",
+                                                        size = 0L,
+                                                        content = ""
+                                                ),
+                                        textColor = textColor,
+                                        backgroundColor = backgroundColor
+                                )
+                            }
                 }
             }
         }
@@ -198,40 +195,41 @@ fun BubbleUserMessageComposable(
         if (trailingAttachments.isNotEmpty()) {
             // Display attachment row above the bubble
             Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
             ) {
                 trailingAttachments.forEach { attachment ->
                     AttachmentTag(
-                        attachment = attachment,
-                        textColor = textColor,
-                        backgroundColor = backgroundColor,
-                        onClick = { attachmentData ->
-                            // 当点击附件标签时，显示内容预览
-                            if (attachmentData.content.isNotEmpty()) {
-                                selectedAttachmentContent.value = attachmentData.content
-                                selectedAttachmentName.value = attachmentData.filename
-                                showContentPreview.value = true
-                            } else if (attachmentData.id.startsWith("/storage/")) {
-                                scope.launch(Dispatchers.IO) {
-                                    try {
-                                        val fileContent = File(attachmentData.id).readText()
-                                        withContext(Dispatchers.Main) {
-                                            selectedAttachmentContent.value = fileContent
-                                            selectedAttachmentName.value = attachmentData.filename
-                                            showContentPreview.value = true
+                            attachment = attachment,
+                            textColor = textColor,
+                            backgroundColor = backgroundColor,
+                            onClick = { attachmentData ->
+                                // 当点击附件标签时，显示内容预览
+                                if (attachmentData.content.isNotEmpty()) {
+                                    selectedAttachmentContent.value = attachmentData.content
+                                    selectedAttachmentName.value = attachmentData.filename
+                                    showContentPreview.value = true
+                                } else if (attachmentData.id.startsWith("/storage/")) {
+                                    scope.launch(Dispatchers.IO) {
+                                        try {
+                                            val fileContent = File(attachmentData.id).readText()
+                                            withContext(Dispatchers.Main) {
+                                                selectedAttachmentContent.value = fileContent
+                                                selectedAttachmentName.value =
+                                                        attachmentData.filename
+                                                showContentPreview.value = true
+                                            }
+                                        } catch (e: Exception) {
+                                            Log.e(
+                                                    "BubbleUserMessage",
+                                                    "Error reading attachment file",
+                                                    e
+                                            )
                                         }
-                                    } catch (e: Exception) {
-                                        Log.e(
-                                            "BubbleUserMessage",
-                                            "Error reading attachment file",
-                                            e
-                                        )
                                     }
                                 }
                             }
-                        }
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                 }
@@ -240,66 +238,117 @@ fun BubbleUserMessageComposable(
 
         // Message bubble
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.Top
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.Top
         ) {
             // 使用Column来垂直排列用户名和消息气泡
             Column(
-                modifier = Modifier
-                    .weight(1f, fill = false)
-                    .padding(start = 32.dp),
-                horizontalAlignment = Alignment.End
+                    modifier = Modifier.weight(1f, fill = false).padding(start = 32.dp),
+                    horizontalAlignment = Alignment.End
             ) {
                 // 显示用户名（如果开启了显示选项并且设置了用户名）
                 if (showUserName) {
                     globalUserName?.let { userName ->
                         if (userName.isNotEmpty()) {
                             Text(
-                                text = userName,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = textColor.copy(alpha = 0.6f),
-                                modifier = Modifier.padding(bottom = 4.dp, end = 4.dp)
+                                    text = userName,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = textColor.copy(alpha = 0.6f),
+                                    modifier = Modifier.padding(bottom = 4.dp, end = 4.dp)
                             )
                         }
                     }
                 }
-                
+
                 // Message bubble
                 Surface(
-                    modifier = Modifier.defaultMinSize(minHeight = 44.dp),
-                    shape = RoundedCornerShape(20.dp, 4.dp, 20.dp, 20.dp),
-                    color = backgroundColor,
-                    tonalElevation = 2.dp
+                        modifier = Modifier.defaultMinSize(minHeight = 44.dp),
+                        shape = RoundedCornerShape(20.dp, 4.dp, 20.dp, 20.dp),
+                        color = Color.Transparent, // Use transparent here to allow gradient
+                        // background
+                        tonalElevation = 0.dp
                 ) {
-                    Text(
-                        text = textContent,
-                        modifier = Modifier.padding(12.dp),
-                        color = textColor,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    Box(
+                            modifier =
+                                    Modifier.background(
+                                                    brush =
+                                                            androidx.compose.ui.graphics.Brush
+                                                                    .linearGradient(
+                                                                            colors =
+                                                                                    listOf(
+                                                                                            MaterialTheme
+                                                                                                    .colorScheme
+                                                                                                    .primary,
+                                                                                            MaterialTheme
+                                                                                                    .colorScheme
+                                                                                                    .tertiary
+                                                                                    )
+                                                                    ),
+                                                    shape =
+                                                            RoundedCornerShape(
+                                                                    20.dp,
+                                                                    4.dp,
+                                                                    20.dp,
+                                                                    20.dp
+                                                            )
+                                            )
+                                            .border(
+                                                    width = 1.dp,
+                                                    color =
+                                                            MaterialTheme.colorScheme.onPrimary
+                                                                    .copy(alpha = 0.2f),
+                                                    shape =
+                                                            RoundedCornerShape(
+                                                                    20.dp,
+                                                                    4.dp,
+                                                                    20.dp,
+                                                                    20.dp
+                                                            )
+                                            )
+                    ) {
+                        Text(
+                                text = textContent,
+                                modifier = Modifier.padding(12.dp),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
                 }
             }
             Spacer(modifier = Modifier.width(8.dp))
             // Avatar
             if (!avatarUri.isNullOrEmpty()) {
                 Image(
-                    painter = rememberAsyncImagePainter(model = Uri.parse(avatarUri)),
-                    contentDescription = "User Avatar",
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(avatarShape),
-                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                        painter = rememberAsyncImagePainter(model = Uri.parse(avatarUri)),
+                        contentDescription = "User Avatar",
+                        modifier =
+                                Modifier.size(32.dp)
+                                        .clip(avatarShape)
+                                        .border(
+                                                1.dp,
+                                                MaterialTheme.colorScheme.primary.copy(
+                                                        alpha = 0.5f
+                                                ),
+                                                avatarShape
+                                        ),
+                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
                 )
             } else {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "User Avatar",
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(avatarShape),
-                    tint = MaterialTheme.colorScheme.primary
-                )
+                Box(
+                        modifier =
+                                Modifier.size(32.dp)
+                                        .clip(avatarShape)
+                                        .background(MaterialTheme.colorScheme.primaryContainer),
+                        contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "User Avatar",
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
             }
         }
     }
@@ -308,45 +357,39 @@ fun BubbleUserMessageComposable(
     if (showContentPreview.value) {
         Dialog(onDismissRequest = { showContentPreview.value = false }) {
             Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 400.dp),
-                shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.surface,
-                tonalElevation = 4.dp
+                    modifier = Modifier.fillMaxWidth().heightIn(max = 400.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 4.dp
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     // 头部
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Code,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
+                                    imageVector = Icons.Default.Code,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary
                             )
                             Text(
-                                text = selectedAttachmentName.value,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurface
+                                    text = selectedAttachmentName.value,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
                             )
                         }
 
-                        IconButton(
-                            onClick = {
-                                showContentPreview.value = false
-                            }
-                        ) {
+                        IconButton(onClick = { showContentPreview.value = false }) {
                             Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = context.getString(R.string.close),
-                                tint = MaterialTheme.colorScheme.onSurface
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = context.getString(R.string.close),
+                                    tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
@@ -355,22 +398,24 @@ fun BubbleUserMessageComposable(
 
                     // 内容区域
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight(align = Alignment.Top)
-                            .weight(1f, fill = false)
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.surfaceVariant,
-                                shape = RoundedCornerShape(4.dp)
-                            )
-                            .padding(8.dp)
-                            .verticalScroll(rememberScrollState())
+                            modifier =
+                                    Modifier.fillMaxWidth()
+                                            .wrapContentHeight(align = Alignment.Top)
+                                            .weight(1f, fill = false)
+                                            .border(
+                                                    width = 1.dp,
+                                                    color =
+                                                            MaterialTheme.colorScheme
+                                                                    .surfaceVariant,
+                                                    shape = RoundedCornerShape(4.dp)
+                                            )
+                                            .padding(8.dp)
+                                            .verticalScroll(rememberScrollState())
                     ) {
                         Text(
-                            text = selectedAttachmentContent.value,
-                            style = MaterialTheme.typography.bodySmall,
-                            fontFamily = FontFamily.Monospace
+                                text = selectedAttachmentContent.value,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontFamily = FontFamily.Monospace
                         )
                     }
 
@@ -378,16 +423,14 @@ fun BubbleUserMessageComposable(
 
                     // 复制按钮
                     Button(
-                        onClick = {
-                            clipboardManager.setText(
-                                AnnotatedString(selectedAttachmentContent.value)
-                            )
-                            showContentPreview.value = false
-                        },
-                        modifier = Modifier.align(Alignment.End)
-                    ) { 
-                        Text(context.getString(R.string.copy_content)) 
-                    }
+                            onClick = {
+                                clipboardManager.setText(
+                                        AnnotatedString(selectedAttachmentContent.value)
+                                )
+                                showContentPreview.value = false
+                            },
+                            modifier = Modifier.align(Alignment.End)
+                    ) { Text(context.getString(R.string.copy_content)) }
                 }
             }
         }
@@ -397,41 +440,39 @@ fun BubbleUserMessageComposable(
     if (showImagePreview.value && selectedImageBitmap.value != null) {
         Dialog(onDismissRequest = { showImagePreview.value = false }) {
             Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(),
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.surface,
-                tonalElevation = 4.dp
+                    modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 4.dp
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     // 头部
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Image,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
+                                    imageVector = Icons.Default.Image,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary
                             )
                             Text(
-                                text = stringResource(R.string.image_preview),
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSurface
+                                    text = stringResource(R.string.image_preview),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
                             )
                         }
 
                         IconButton(onClick = { showImagePreview.value = false }) {
                             Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = stringResource(R.string.close),
-                                tint = MaterialTheme.colorScheme.onSurface
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = stringResource(R.string.close),
+                                    tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
@@ -440,17 +481,17 @@ fun BubbleUserMessageComposable(
 
                     // 图片显示区域
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 500.dp)
-                            .clip(RoundedCornerShape(8.dp))
+                            modifier =
+                                    Modifier.fillMaxWidth()
+                                            .heightIn(max = 500.dp)
+                                            .clip(RoundedCornerShape(8.dp))
                     ) {
                         selectedImageBitmap.value?.let { bitmap ->
                             Image(
-                                bitmap = bitmap.asImageBitmap(),
-                                contentDescription = null,
-                                modifier = Modifier.fillMaxWidth(),
-                                contentScale = ContentScale.Fit
+                                    bitmap = bitmap.asImageBitmap(),
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentScale = ContentScale.Fit
                             )
                         }
                     }
@@ -462,23 +503,19 @@ fun BubbleUserMessageComposable(
 
 /** Result of parsing message content, containing processed text and trailing attachments */
 data class MessageParseResult(
-    val processedText: String,
-    val trailingAttachments: List<AttachmentData>,
-    val replyInfo: ReplyInfo? = null, // 新增回复信息
-    val imageLinks: List<ImageLinkData> = emptyList() // 图片链接数据
+        val processedText: String,
+        val trailingAttachments: List<AttachmentData>,
+        val replyInfo: ReplyInfo? = null, // 新增回复信息
+        val imageLinks: List<ImageLinkData> = emptyList() // 图片链接数据
 )
 
 /** Data class for reply information */
-data class ReplyInfo(
-    val sender: String,
-    val timestamp: Long,
-    val content: String
-)
+data class ReplyInfo(val sender: String, val timestamp: Long, val content: String)
 
 /** Data class for image link information */
 data class ImageLinkData(
-    val id: String,
-    val bitmap: Bitmap? // null表示图片已过期
+        val id: String,
+        val bitmap: Bitmap? // null表示图片已过期
 )
 
 /**
@@ -488,23 +525,28 @@ data class ImageLinkData(
 private fun parseMessageContent(content: String): MessageParseResult {
     // First, strip out any <memory> tags so they are not displayed in the UI.
     var cleanedContent =
-        content.replace(Regex("<memory>.*?</memory>", RegexOption.DOT_MATCHES_ALL), "").trim()
+            content.replace(Regex("<memory>.*?</memory>", RegexOption.DOT_MATCHES_ALL), "").trim()
 
     // Extract image link tags and load from pool
-    val imageLinkRegex = Regex("""<link\s+type="image"\s+id="([^"]+)"\s*>.*?</link>""", RegexOption.DOT_MATCHES_ALL)
+    val imageLinkRegex =
+            Regex(
+                    """<link\s+type="image"\s+id="([^"]+)"\s*>.*?</link>""",
+                    RegexOption.DOT_MATCHES_ALL
+            )
     val imageLinks = mutableListOf<ImageLinkData>()
     imageLinkRegex.findAll(cleanedContent).forEach { match ->
         val id = match.groupValues[1]
         if (id != "error") {
             val imageData = ImagePoolManager.getImage(id)
             if (imageData != null) {
-                val bitmap = try {
-                    val bytes = Base64.decode(imageData.base64, Base64.DEFAULT)
-                    BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                } catch (e: Exception) {
-                    Log.e("BubbleUserMessage", "Failed to decode image: $id", e)
-                    null
-                }
+                val bitmap =
+                        try {
+                            val bytes = Base64.decode(imageData.base64, Base64.DEFAULT)
+                            BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                        } catch (e: Exception) {
+                            Log.e("BubbleUserMessage", "Failed to decode image: $id", e)
+                            null
+                        }
                 imageLinks.add(ImageLinkData(id, bitmap))
             }
         }
@@ -513,44 +555,43 @@ private fun parseMessageContent(content: String): MessageParseResult {
     cleanedContent = cleanedContent.replace(imageLinkRegex, "").trim()
 
     // Extract reply information
-    val replyRegex = Regex("<reply_to\\s+sender=\"([^\"]+)\"\\s+timestamp=\"([^\"]+)\">([^<]*)</reply_to>")
+    val replyRegex =
+            Regex("<reply_to\\s+sender=\"([^\"]+)\"\\s+timestamp=\"([^\"]+)\">([^<]*)</reply_to>")
     val replyMatch = replyRegex.find(cleanedContent)
-    val replyInfo = replyMatch?.let { match ->
-        val fullContent = match.groupValues[3]
-        // 指示语，用于从回复内容中提取纯净的预览文本
-        val instruction = "用户正在回复你之前的这条消息："
-        val displayContent = fullContent
-            .removePrefix(instruction)
-            .trim()
-            .removeSurrounding("\"")
+    val replyInfo =
+            replyMatch?.let { match ->
+                val fullContent = match.groupValues[3]
+                // 指示语，用于从回复内容中提取纯净的预览文本
+                val instruction = "用户正在回复你之前的这条消息："
+                val displayContent =
+                        fullContent.removePrefix(instruction).trim().removeSurrounding("\"")
 
-        ReplyInfo(
-            sender = match.groupValues[1],
-            timestamp = match.groupValues[2].toLongOrNull() ?: 0L,
-            content = displayContent
-        )
-    }
-    
+                ReplyInfo(
+                        sender = match.groupValues[1],
+                        timestamp = match.groupValues[2].toLongOrNull() ?: 0L,
+                        content = displayContent
+                )
+            }
+
     // Remove reply tag from content
-    cleanedContent = replyMatch?.let { 
-        cleanedContent.replace(it.value, "").trim() 
-    } ?: cleanedContent
+    cleanedContent =
+            replyMatch?.let { cleanedContent.replace(it.value, "").trim() } ?: cleanedContent
 
     val workspaceAttachments = mutableListOf<AttachmentData>()
     // Extract workspace context as a special attachment
     val workspaceRegex =
-        Regex("<workspace_attachment>.*?</workspace_attachment>", RegexOption.DOT_MATCHES_ALL)
+            Regex("<workspace_attachment>.*?</workspace_attachment>", RegexOption.DOT_MATCHES_ALL)
     val workspaceMatch = workspaceRegex.find(cleanedContent)
     if (workspaceMatch != null) {
         val workspaceContent = workspaceMatch.value
         workspaceAttachments.add(
-            AttachmentData(
-                id = "workspace_context",
-                filename = "工作区状态",
-                type = "application/vnd.workspace-context+xml",
-                size = workspaceContent.length.toLong(),
-                content = workspaceContent
-            )
+                AttachmentData(
+                        id = "workspace_context",
+                        filename = "工作区状态",
+                        type = "application/vnd.workspace-context+xml",
+                        size = workspaceContent.length.toLong(),
+                        content = workspaceContent
+                )
         )
         cleanedContent = cleanedContent.replace(workspaceContent, "").trim()
     }
@@ -579,103 +620,115 @@ private fun parseMessageContent(content: String): MessageParseResult {
         // Try to find matches with both patterns
         val pairedMatches = pairedTagPattern.findAll(cleanedContent).toList()
         val selfClosingMatches = selfClosingPattern.findAll(cleanedContent).toList()
-        
+
         // Combine and sort all matches by position
-        val allMatches = (pairedMatches.map { it to true } + selfClosingMatches.map { it to false })
-                .sortedBy { it.first.range.first }
-        
+        val allMatches =
+                (pairedMatches.map { it to true } + selfClosingMatches.map { it to false })
+                        .sortedBy { it.first.range.first }
+
         // Remove overlapping matches (prefer paired tag format)
         val matches = mutableListOf<Pair<MatchResult, Boolean>>()
         var lastEnd = -1
         allMatches.forEach { (match, isPaired) ->
-                if (match.range.first > lastEnd) {
-                        matches.add(match to isPaired)
-                        lastEnd = match.range.last
-                }
+            if (match.range.first > lastEnd) {
+                matches.add(match to isPaired)
+                lastEnd = match.range.last
+            }
         }
-        
+
         if (matches.isEmpty()) {
-                return MessageParseResult(cleanedContent, workspaceAttachments, replyInfo, imageLinks)
+            return MessageParseResult(cleanedContent, workspaceAttachments, replyInfo, imageLinks)
         }
 
         // Determine which attachments form a contiguous block at the end
         val trailingAttachmentIndices = mutableSetOf<Int>()
         if (matches.isNotEmpty()) {
-                val contentAfterLast = cleanedContent.substring(matches.last().first.range.last + 1)
-                if (contentAfterLast.isBlank()) {
-                        trailingAttachmentIndices.add(matches.size - 1)
-                        for (i in matches.size - 2 downTo 0) {
-                                val textBetween = cleanedContent.substring(matches[i].first.range.last + 1, matches[i + 1].first.range.first)
-                                if (textBetween.isBlank()) {
-                                        trailingAttachmentIndices.add(i)
-                                } else {
-                                        break
-                                }
-                        }
+            val contentAfterLast = cleanedContent.substring(matches.last().first.range.last + 1)
+            if (contentAfterLast.isBlank()) {
+                trailingAttachmentIndices.add(matches.size - 1)
+                for (i in matches.size - 2 downTo 0) {
+                    val textBetween =
+                            cleanedContent.substring(
+                                    matches[i].first.range.last + 1,
+                                    matches[i + 1].first.range.first
+                            )
+                    if (textBetween.isBlank()) {
+                        trailingAttachmentIndices.add(i)
+                    } else {
+                        break
+                    }
                 }
+            }
         }
 
         // Process all attachments
         var lastIndex = 0
         matches.forEachIndexed { index, (matchResult, isPaired) ->
-                // Add text before this attachment
-                val startIndex = matchResult.range.first
+            // Add text before this attachment
+            val startIndex = matchResult.range.first
 
-                // Extract attachment data
-                val id = matchResult.groupValues[1]
-                val filename = matchResult.groupValues[2]
-                val type = matchResult.groupValues[3]
-                val size = matchResult.groupValues[4].toLongOrNull() ?: 0L
-                // For paired tags, content is in group 5; for self-closing, it's also in group 5
-                val attachmentContent = matchResult.groupValues[5]
+            // Extract attachment data
+            val id = matchResult.groupValues[1]
+            val filename = matchResult.groupValues[2]
+            val type = matchResult.groupValues[3]
+            val size = matchResult.groupValues[4].toLongOrNull() ?: 0L
+            // For paired tags, content is in group 5; for self-closing, it's also in group 5
+            val attachmentContent = matchResult.groupValues[5]
 
-                // Create attachment data object, including content if available
-                val attachment =
-                        AttachmentData(
-                                id = id,
-                                filename = filename,
-                                type = type,
-                                size = size,
-                                content = attachmentContent
-                        )
+            // Create attachment data object, including content if available
+            val attachment =
+                    AttachmentData(
+                            id = id,
+                            filename = filename,
+                            type = type,
+                            size = size,
+                            content = attachmentContent
+                    )
 
-                val isTrailingAttachment = trailingAttachmentIndices.contains(index)
+            val isTrailingAttachment = trailingAttachmentIndices.contains(index)
 
-                // 特殊处理屏幕内容附件，始终将其作为trailing attachment
-                val isScreenContent =
-                        (type == "text/json" && filename == "screen_content.json")
+            // 特殊处理屏幕内容附件，始终将其作为trailing attachment
+            val isScreenContent = (type == "text/json" && filename == "screen_content.json")
 
-                val shouldBeTrailing = isTrailingAttachment || isScreenContent
+            val shouldBeTrailing = isTrailingAttachment || isScreenContent
 
-                if (startIndex > lastIndex) {
-                        val textBefore = cleanedContent.substring(lastIndex, startIndex)
-                        // Only append text if it's before an inline attachment,
-                        // or if it's before the very first trailing attachment.
-                        if (!shouldBeTrailing || (trailingAttachmentIndices.isNotEmpty() && index == trailingAttachmentIndices.minOrNull())) {
-                                messageText.append(textBefore)
-                        }
+            if (startIndex > lastIndex) {
+                val textBefore = cleanedContent.substring(lastIndex, startIndex)
+                // Only append text if it's before an inline attachment,
+                // or if it's before the very first trailing attachment.
+                if (!shouldBeTrailing ||
+                                (trailingAttachmentIndices.isNotEmpty() &&
+                                        index == trailingAttachmentIndices.minOrNull())
+                ) {
+                    messageText.append(textBefore)
                 }
+            }
 
-                if (shouldBeTrailing) {
-                        // This is a trailing attachment, extract it
-                        trailingAttachments.add(attachment)
-                } else {
-                        // This is an inline attachment, keep it in the text as @filename
-                        messageText.append("@${filename}")
-                        // Also add to general attachments list for reference
-                        attachments.add(attachment)
-                }
+            if (shouldBeTrailing) {
+                // This is a trailing attachment, extract it
+                trailingAttachments.add(attachment)
+            } else {
+                // This is an inline attachment, keep it in the text as @filename
+                messageText.append("@${filename}")
+                // Also add to general attachments list for reference
+                attachments.add(attachment)
+            }
 
-                lastIndex = matchResult.range.last + 1
+            lastIndex = matchResult.range.last + 1
         }
 
         // Add any remaining text if the last part of the message was not a trailing attachment
         if (lastIndex < cleanedContent.length) {
-                messageText.append(cleanedContent.substring(lastIndex))
+            messageText.append(cleanedContent.substring(lastIndex))
         }
 
         trailingAttachments.addAll(0, workspaceAttachments)
-        return MessageParseResult(messageText.toString(), trailingAttachments, replyInfo, imageLinks)
+        return MessageParseResult(
+                messageText.toString(),
+                trailingAttachments,
+                replyInfo,
+                imageLinks
+        )
     } catch (e: Exception) {
         // 如果解析失败，返回原始内容
         android.util.Log.e("BubbleUserMessageComposable", "Failed to parse message content", e)
@@ -685,72 +738,77 @@ private fun parseMessageContent(content: String): MessageParseResult {
 
 /** Data class for attachment information */
 data class AttachmentData(
-    val id: String,
-    val filename: String,
-    val type: String,
-    val size: Long = 0,
-    val content: String = "" // Added content field
+        val id: String,
+        val filename: String,
+        val type: String,
+        val size: Long = 0,
+        val content: String = "" // Added content field
 )
 
 /** Compact attachment tag component for displaying in user messages */
 @Composable
 private fun AttachmentTag(
-    attachment: AttachmentData,
-    textColor: Color,
-    backgroundColor: Color,
-    onClick: (AttachmentData) -> Unit = {}
+        attachment: AttachmentData,
+        textColor: Color,
+        backgroundColor: Color,
+        onClick: (AttachmentData) -> Unit = {}
 ) {
     val context = LocalContext.current
     // 根据附件类型选择图标
     val icon: ImageVector =
-        when {
-            attachment.type.startsWith("image/") -> Icons.Default.Image
-            attachment.type == "text/json" && attachment.filename == "screen_content.json" ->
-                Icons.Default.ScreenshotMonitor
-            attachment.type == "application/vnd.workspace-context+xml" -> Icons.Default.Code
-            else -> Icons.Default.Description
-        }
+            when {
+                attachment.type.startsWith("image/") -> Icons.Default.Image
+                attachment.type == "text/json" && attachment.filename == "screen_content.json" ->
+                        Icons.Default.ScreenshotMonitor
+                attachment.type == "application/vnd.workspace-context+xml" -> Icons.Default.Code
+                else -> Icons.Default.Description
+            }
 
     // 根据附件类型调整显示标签
     val displayLabel =
-        when {
-            attachment.type == "text/json" && attachment.filename == "screen_content.json" -> context.getString(R.string.screen_content)
-            attachment.type == "application/vnd.workspace-context+xml" -> context.getString(R.string.workspace)
-            else -> attachment.filename
-        }
+            when {
+                attachment.type == "text/json" && attachment.filename == "screen_content.json" ->
+                        context.getString(R.string.screen_content)
+                attachment.type == "application/vnd.workspace-context+xml" ->
+                        context.getString(R.string.workspace)
+                else -> attachment.filename
+            }
 
     Surface(
-        modifier =
-            Modifier.height(24.dp)
-                .padding(vertical = 2.dp)
-                .clickable(
-                    enabled = attachment.content.isNotEmpty() || attachment.id.startsWith("/storage/") || attachment.type.startsWith("image/"),
-                    onClick = { onClick(attachment) }
-                ),
-        shape = RoundedCornerShape(12.dp),
-        color = backgroundColor.copy(alpha = 0.5f)
+            modifier =
+                    Modifier.height(24.dp)
+                            .padding(vertical = 2.dp)
+                            .clickable(
+                                    enabled =
+                                            attachment.content.isNotEmpty() ||
+                                                    attachment.id.startsWith("/storage/") ||
+                                                    attachment.type.startsWith("image/"),
+                                    onClick = { onClick(attachment) }
+                            ),
+            shape = RoundedCornerShape(12.dp),
+            color = backgroundColor.copy(alpha = 0.5f)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-            verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(12.dp),
-                tint = textColor.copy(alpha = 0.8f)
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(12.dp),
+                    tint = textColor.copy(alpha = 0.8f)
             )
 
             Spacer(modifier = Modifier.width(4.dp))
 
             Text(
-                text = displayLabel,
-                style = MaterialTheme.typography.bodySmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = textColor,
-                modifier = Modifier.widthIn(max = 120.dp)
+                    text = displayLabel,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = textColor,
+                    modifier = Modifier.widthIn(max = 120.dp)
             )
         }
     }
-} 
+}
