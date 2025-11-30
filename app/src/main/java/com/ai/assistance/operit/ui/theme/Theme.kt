@@ -13,12 +13,12 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
-import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -36,9 +36,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import coil.compose.AsyncImagePainter
@@ -55,30 +58,48 @@ import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import java.io.File
 import kotlinx.coroutines.launch
-import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 
 private val DarkColorScheme =
-        darkColorScheme(primary = Purple80, secondary = PurpleGrey80, tertiary = Pink80)
+        darkColorScheme(
+                primary = PrimaryViolet,
+                onPrimary = TextPrimary,
+                primaryContainer = PrimaryViolet.copy(alpha = 0.2f),
+                onPrimaryContainer = TextPrimary,
+                secondary = SecondaryCyan,
+                onSecondary = NebulaBackground,
+                secondaryContainer = SecondaryCyan.copy(alpha = 0.2f),
+                onSecondaryContainer = TextPrimary,
+                tertiary = PrimaryBlue,
+                onTertiary = NebulaBackground,
+                background = NebulaBackground,
+                onBackground = TextPrimary,
+                surface = NebulaSurface,
+                onSurface = TextPrimary,
+                surfaceVariant = NebulaSurfaceHighlight,
+                onSurfaceVariant = TextSecondary,
+                outline = GlassBorder
+        )
 
 private val LightColorScheme =
         lightColorScheme(
-                primary = Purple40,
-                secondary = PurpleGrey40,
-                tertiary = Pink40,
-
-                /* Other default colors to override
-                background = Color(0xFFFFFBFE),
-                surface = Color(0xFFFFFBFE),
+                primary = PrimaryViolet,
                 onPrimary = Color.White,
+                primaryContainer = PrimaryViolet.copy(alpha = 0.1f),
+                onPrimaryContainer = PrimaryViolet,
+                secondary = SecondaryCyan,
                 onSecondary = Color.White,
+                secondaryContainer = SecondaryCyan.copy(alpha = 0.1f),
+                onSecondaryContainer = SecondaryCyan,
+                tertiary = PrimaryBlue,
                 onTertiary = Color.White,
-                onBackground = Color(0xFF1C1B1F),
-                onSurface = Color(0xFF1C1B1F),
-                */
-                )
-
+                background = LightBackground,
+                onBackground = LightTextPrimary,
+                surface = LightSurface,
+                onSurface = LightTextPrimary,
+                surfaceVariant = Color.White,
+                onSurfaceVariant = LightTextSecondary,
+                outline = Color(0xFFE0E0E0)
+        )
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
@@ -121,31 +142,38 @@ fun OperitTheme(content: @Composable () -> Unit) {
             preferencesManager.customStatusBarColor.collectAsState(initial = null)
     val statusBarTransparent by
             preferencesManager.statusBarTransparent.collectAsState(initial = false)
-    val statusBarHidden by
-            preferencesManager.statusBarHidden.collectAsState(initial = false)
+    val statusBarHidden by preferencesManager.statusBarHidden.collectAsState(initial = false)
 
     // 获取背景模糊设置
     val useBackgroundBlur by preferencesManager.useBackgroundBlur.collectAsState(initial = false)
-    val backgroundBlurRadius by preferencesManager.backgroundBlurRadius.collectAsState(initial = 10f)
+    val backgroundBlurRadius by
+            preferencesManager.backgroundBlurRadius.collectAsState(initial = 10f)
 
     // 获取字体设置
     val useCustomFont by preferencesManager.useCustomFont.collectAsState(initial = false)
-    val fontType by preferencesManager.fontType.collectAsState(initial = UserPreferencesManager.FONT_TYPE_SYSTEM)
-    val systemFontName by preferencesManager.systemFontName.collectAsState(initial = UserPreferencesManager.SYSTEM_FONT_DEFAULT)
+    val fontType by
+            preferencesManager.fontType.collectAsState(
+                    initial = UserPreferencesManager.FONT_TYPE_SYSTEM
+            )
+    val systemFontName by
+            preferencesManager.systemFontName.collectAsState(
+                    initial = UserPreferencesManager.SYSTEM_FONT_DEFAULT
+            )
     val customFontPath by preferencesManager.customFontPath.collectAsState(initial = null)
     val fontScale by preferencesManager.fontScale.collectAsState(initial = 1.0f)
 
     // 创建自定义 Typography
-    val customTypography = remember(useCustomFont, fontType, systemFontName, customFontPath, fontScale) {
-        createCustomTypography(
-            context = context,
-            useCustomFont = useCustomFont,
-            fontType = fontType,
-            systemFontName = systemFontName,
-            customFontPath = customFontPath,
-            fontScale = fontScale
-        )
-    }
+    val customTypography =
+            remember(useCustomFont, fontType, systemFontName, customFontPath, fontScale) {
+                createCustomTypography(
+                        context = context,
+                        useCustomFont = useCustomFont,
+                        fontType = fontType,
+                        systemFontName = systemFontName,
+                        customFontPath = customFontPath,
+                        fontScale = fontScale
+                )
+            }
 
     // 确定是否使用暗色主题
     val systemDarkTheme = isSystemInDarkTheme()
@@ -176,10 +204,11 @@ fun OperitTheme(content: @Composable () -> Unit) {
             val primary = Color(primaryArgb)
             val secondary = customSecondaryColor?.let { Color(it) } ?: colorScheme.secondary
 
-            colorScheme = if (darkTheme) {
-                generateDarkColorScheme(primary, secondary, onColorMode)
+            colorScheme =
+                    if (darkTheme) {
+                        generateDarkColorScheme(primary, secondary, onColorMode)
                     } else {
-                generateLightColorScheme(primary, secondary, onColorMode)
+                        generateLightColorScheme(primary, secondary, onColorMode)
                     }
         }
     }
@@ -189,7 +218,7 @@ fun OperitTheme(content: @Composable () -> Unit) {
         SideEffect {
             val window = (view.context as Activity).window
             val insetsController = ViewCompat.getWindowInsetsController(view)
-            
+
             // 始终保持沉浸式模式，让Compose处理状态栏背景
             WindowCompat.setDecorFitsSystemWindows(window, false)
 
@@ -197,19 +226,22 @@ fun OperitTheme(content: @Composable () -> Unit) {
             if (statusBarHidden) {
                 // 隐藏状态栏
                 insetsController?.hide(WindowInsetsCompat.Type.statusBars())
-                insetsController?.systemBarsBehavior = 
-                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                insetsController?.systemBarsBehavior =
+                        WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             } else {
                 // 显示状态栏
                 insetsController?.show(WindowInsetsCompat.Type.statusBars())
-                
+
                 // 状态栏颜色和图标颜色控制
-                val statusBarColor = when {
-                    statusBarTransparent -> Color.Transparent.toArgb()
-                    useBackgroundImage && backgroundImageUri != null -> Color.Transparent.toArgb()  // 有背景时透明
-                    useCustomStatusBarColor && customStatusBarColorValue != null -> customStatusBarColorValue!!.toInt()
-                    else -> colorScheme.primary.toArgb()
-                }
+                val statusBarColor =
+                        when {
+                            statusBarTransparent -> Color.Transparent.toArgb()
+                            useBackgroundImage && backgroundImageUri != null ->
+                                    Color.Transparent.toArgb() // 有背景时透明
+                            useCustomStatusBarColor && customStatusBarColorValue != null ->
+                                    customStatusBarColorValue!!.toInt()
+                            else -> colorScheme.primary.toArgb()
+                        }
                 window.statusBarColor = statusBarColor
 
                 // 根据状态栏背景色动态设置状态栏图标颜色
@@ -217,7 +249,7 @@ fun OperitTheme(content: @Composable () -> Unit) {
                 // isAppearanceLightStatusBars = false 表示图标为浅色（适用于深色背景）
                 insetsController?.isAppearanceLightStatusBars = !isColorLight(Color(statusBarColor))
             }
-            
+
             // 设置导航栏颜色（底部小白条所在的区域）
             // 在有背景图片时，让导航栏透明
             if (useBackgroundImage && backgroundImageUri != null) {
@@ -238,7 +270,8 @@ fun OperitTheme(content: @Composable () -> Unit) {
                 // 根据导航栏背景色动态设置导航栏图标颜色
                 // isAppearanceLightNavigationBars = true 表示图标为深色（适用于浅色背景）
                 // isAppearanceLightNavigationBars = false 表示图标为浅色（适用于深色背景）
-                insetsController?.isAppearanceLightNavigationBars = !isColorLight(colorScheme.background)
+                insetsController?.isAppearanceLightNavigationBars =
+                        !isColorLight(colorScheme.background)
             }
         }
     }
@@ -261,10 +294,10 @@ fun OperitTheme(content: @Composable () -> Unit) {
                             .setLoadControl(
                                     DefaultLoadControl.Builder()
                                             .setBufferDurationsMs(
-                                                    5000,  // 最小缓冲时间，减少到5秒
+                                                    5000, // 最小缓冲时间，减少到5秒
                                                     10000, // 最大缓冲时间，减少到10秒
-                                                    500,   // 回放所需的最小缓冲
-                                                    1000   // 重新缓冲后回放所需的最小缓冲
+                                                    500, // 回放所需的最小缓冲
+                                                    1000 // 重新缓冲后回放所需的最小缓冲
                                             )
                                             .setTargetBufferBytes(5 * 1024 * 1024) // 将缓冲限制为5MB
                                             .setPrioritizeTimeOverSizeThresholds(true)
@@ -305,16 +338,16 @@ fun OperitTheme(content: @Composable () -> Unit) {
             }
 
     // 释放ExoPlayer资源
-    DisposableEffect(key1 = Unit) { 
-        onDispose { 
+    DisposableEffect(key1 = Unit) {
+        onDispose {
             try {
                 exoPlayer?.stop()
                 exoPlayer?.clearMediaItems()
-                exoPlayer?.release() 
+                exoPlayer?.release()
             } catch (e: Exception) {
                 Log.e("OperitTheme", "ExoPlayer释放错误", e)
             }
-        } 
+        }
     }
 
     // 监听应用生命周期，控制视频播放
@@ -409,7 +442,9 @@ fun OperitTheme(content: @Composable () -> Unit) {
                                             .alpha(backgroundImageOpacity) // 使用设置的不透明度
                                             .then(
                                                     if (useBackgroundBlur)
-                                                            Modifier.blur(radius = backgroundBlurRadius.dp)
+                                                            Modifier.blur(
+                                                                    radius = backgroundBlurRadius.dp
+                                                            )
                                                     else Modifier
                                             ),
                             contentScale = ContentScale.Crop
@@ -438,10 +473,16 @@ fun OperitTheme(content: @Composable () -> Unit) {
                                                                 ((1f - backgroundImageOpacity) *
                                                                                 255)
                                                                         .toInt(),
-                                                                if (darkTheme) 0 else 255, // R: Black(0) or White(255)
-                                                                if (darkTheme) 0 else 255, // G: Black(0) or White(255)
-                                                                if (darkTheme) 0 else 255  // B: Black(0) or White(255)
-                                                        )
+                                                                if (darkTheme) 0
+                                                                else 255, // R: Black(0) or
+                                                                // White(255)
+                                                                if (darkTheme) 0
+                                                                else 255, // G: Black(0) or
+                                                                // White(255)
+                                                                if (darkTheme) 0
+                                                                else 255 // B: Black(0) or
+                                                                // White(255)
+                                                                )
                                                 )
                                     }
                                 },
@@ -457,9 +498,12 @@ fun OperitTheme(content: @Composable () -> Unit) {
                                                     android.graphics.Color.argb(
                                                             ((1f - backgroundImageOpacity) * 255)
                                                                     .toInt(),
-                                                            if (darkTheme) 0 else 255, // R: Black(0) or White(255)
-                                                            if (darkTheme) 0 else 255, // G: Black(0) or White(255)
-                                                            if (darkTheme) 0 else 255  // B: Black(0) or White(255)
+                                                            if (darkTheme) 0
+                                                            else 255, // R: Black(0) or White(255)
+                                                            if (darkTheme) 0
+                                                            else 255, // G: Black(0) or White(255)
+                                                            if (darkTheme) 0
+                                                            else 255 // B: Black(0) or White(255)
                                                     )
                                             )
                                 },
@@ -496,7 +540,11 @@ fun OperitTheme(content: @Composable () -> Unit) {
             }
         } else {
             // 不使用背景图片时，直接应用主题
-            MaterialTheme(colorScheme = colorScheme, typography = customTypography, content = content)
+            MaterialTheme(
+                    colorScheme = colorScheme,
+                    typography = customTypography,
+                    content = content
+            )
         }
     }
 }
@@ -504,19 +552,21 @@ fun OperitTheme(content: @Composable () -> Unit) {
 /** 为亮色主题生成基于主色的完整颜色方案 */
 private fun generateLightColorScheme(
         primaryColor: Color,
-    secondaryColor: Color,
-    onColorMode: String
+        secondaryColor: Color,
+        onColorMode: String
 ): ColorScheme {
-    val onPrimary = when (onColorMode) {
-        ON_COLOR_MODE_LIGHT -> Color.White
-        ON_COLOR_MODE_DARK -> Color.Black
-        else -> getContrastingTextColor(primaryColor)
-    }
-    val onSecondary = when (onColorMode) {
-        ON_COLOR_MODE_LIGHT -> Color.White
-        ON_COLOR_MODE_DARK -> Color.Black
-        else -> getContrastingTextColor(secondaryColor)
-    }
+    val onPrimary =
+            when (onColorMode) {
+                ON_COLOR_MODE_LIGHT -> Color.White
+                ON_COLOR_MODE_DARK -> Color.Black
+                else -> getContrastingTextColor(primaryColor)
+            }
+    val onSecondary =
+            when (onColorMode) {
+                ON_COLOR_MODE_LIGHT -> Color.White
+                ON_COLOR_MODE_DARK -> Color.Black
+                else -> getContrastingTextColor(secondaryColor)
+            }
 
     val primaryContainer = lightenColor(primaryColor, 0.7f)
     val onPrimaryContainer = getContrastingTextColor(primaryContainer)
@@ -533,32 +583,34 @@ private fun generateLightColorScheme(
             onSecondary = onSecondary,
             secondaryContainer = secondaryContainer,
             onSecondaryContainer = onSecondaryContainer,
-        // Ensure other colors are consistent with a light theme
-        onSurface = Color.Black,
-        onSurfaceVariant = Color.Black.copy(alpha = 0.7f),
-        onBackground = Color.Black
+            // Ensure other colors are consistent with a light theme
+            onSurface = Color.Black,
+            onSurfaceVariant = Color.Black.copy(alpha = 0.7f),
+            onBackground = Color.Black
     )
 }
 
 /** 为暗色主题生成基于主色的完整颜色方案 */
 private fun generateDarkColorScheme(
         primaryColor: Color,
-    secondaryColor: Color,
-    onColorMode: String
+        secondaryColor: Color,
+        onColorMode: String
 ): ColorScheme {
     val adjustedPrimaryColor = lightenColor(primaryColor, 0.2f)
     val adjustedSecondaryColor = lightenColor(secondaryColor, 0.2f)
 
-    val onPrimary = when (onColorMode) {
-        ON_COLOR_MODE_LIGHT -> Color.White
-        ON_COLOR_MODE_DARK -> Color.Black
-        else -> getContrastingTextColor(adjustedPrimaryColor)
-    }
-    val onSecondary = when (onColorMode) {
-        ON_COLOR_MODE_LIGHT -> Color.White
-        ON_COLOR_MODE_DARK -> Color.Black
-        else -> getContrastingTextColor(adjustedSecondaryColor)
-    }
+    val onPrimary =
+            when (onColorMode) {
+                ON_COLOR_MODE_LIGHT -> Color.White
+                ON_COLOR_MODE_DARK -> Color.Black
+                else -> getContrastingTextColor(adjustedPrimaryColor)
+            }
+    val onSecondary =
+            when (onColorMode) {
+                ON_COLOR_MODE_LIGHT -> Color.White
+                ON_COLOR_MODE_DARK -> Color.Black
+                else -> getContrastingTextColor(adjustedSecondaryColor)
+            }
 
     val primaryContainer = darkenColor(primaryColor, 0.3f)
     val onPrimaryContainer = getContrastingTextColor(primaryContainer, forceLight = true)
@@ -575,10 +627,10 @@ private fun generateDarkColorScheme(
             onSecondary = onSecondary,
             secondaryContainer = secondaryContainer,
             onSecondaryContainer = onSecondaryContainer,
-        // Ensure other colors are consistent with a dark theme
-        onSurface = Color.White,
-        onSurfaceVariant = Color.White.copy(alpha = 0.7f),
-        onBackground = Color.White
+            // Ensure other colors are consistent with a dark theme
+            onSurface = Color.White,
+            onSurfaceVariant = Color.White.copy(alpha = 0.7f),
+            onBackground = Color.White
     )
 }
 
