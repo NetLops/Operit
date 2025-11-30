@@ -589,52 +589,60 @@ val actualViewModel: ChatViewModel = viewModel ?: viewModel { ChatViewModel(cont
                 // It respects the padding from the Scaffold's bottomBar.
                 Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
                     Box(modifier = Modifier.weight(1f)) {
-                        ChatScreenContent(
-                                // modifier = Modifier.weight(1f), // This is no longer needed here
-                                paddingValues =
-                                        PaddingValues(), // Padding is already handled by the parent Box
-                                actualViewModel = actualViewModel,
-                                showChatHistorySelector = showChatHistorySelector,
-                                chatHistory = chatHistory,
-                                enableAiPlanning = enableAiPlanning,
-                                isLoading = isLoading,
-                                userMessageColor = userMessageColor,
-                                aiMessageColor = aiMessageColor,
-                                userTextColor = userTextColor,
-                                aiTextColor = aiTextColor,
-                                systemMessageColor = systemMessageColor,
-                                systemTextColor = systemTextColor,
-                                thinkingBackgroundColor = thinkingBackgroundColor,
-                                thinkingTextColor = thinkingTextColor,
-                                hasBackgroundImage = hasBackgroundImage,
-                                editingMessageIndex = editingMessageIndex,
-                                editingMessageContent = editingMessageContent,
-                                chatScreenGestureConsumed = chatScreenGestureConsumed,
-                                onChatScreenGestureConsumed = onChatScreenGestureConsumedChange,
-                                currentDrag = currentDrag,
-                                onCurrentDragChange = onCurrentDragChange,
-                                verticalDrag = verticalDrag,
-                                onVerticalDragChange = onVerticalDragChange,
-                                dragThreshold = dragThreshold,
-                                scrollState = scrollState,
-                                autoScrollToBottom = autoScrollToBottom,
-                                onAutoScrollToBottomChange = onAutoScrollToBottomChange,
-                                coroutineScope = coroutineScope,
-                                chatHistories = chatHistories,
-                                currentChatId = currentChatId ?: "",
-                                chatHeaderTransparent = chatHeaderTransparent,
-                                chatHeaderHistoryIconColor = chatHeaderHistoryIconColor,
-                                chatHeaderPipIconColor = chatHeaderPipIconColor,
-                                chatHeaderOverlayMode = chatHeaderOverlayMode,
-                                chatStyle = chatStyle, // Pass chat style
-                                historyListState = historyListState,
-                                onSwitchCharacter = { characterId ->
-                                    coroutineScope.launch {
-                                        characterCardManager.setActiveCharacterCard(characterId)
-                                    }
-                                },
-                                chatAreaHorizontalPadding = chatAreaHorizontalPadding
-                        )
+                        if (chatHistory.isEmpty()) {
+                            BentoGridScreen(
+                                viewModel = actualViewModel,
+                                onNavigateToHistory = { actualViewModel.showChatHistorySelector() },
+                                onNavigateToInspiration = { /* TODO: Navigate to inspiration */ }
+                            )
+                        } else {
+                            ChatScreenContent(
+                                    // modifier = Modifier.weight(1f), // This is no longer needed here
+                                    paddingValues =
+                                            PaddingValues(), // Padding is already handled by the parent Box
+                                    actualViewModel = actualViewModel,
+                                    showChatHistorySelector = showChatHistorySelector,
+                                    chatHistory = chatHistory,
+                                    enableAiPlanning = enableAiPlanning,
+                                    isLoading = isLoading,
+                                    userMessageColor = userMessageColor,
+                                    aiMessageColor = aiMessageColor,
+                                    userTextColor = userTextColor,
+                                    aiTextColor = aiTextColor,
+                                    systemMessageColor = systemMessageColor,
+                                    systemTextColor = systemTextColor,
+                                    thinkingBackgroundColor = thinkingBackgroundColor,
+                                    thinkingTextColor = thinkingTextColor,
+                                    hasBackgroundImage = hasBackgroundImage,
+                                    editingMessageIndex = editingMessageIndex,
+                                    editingMessageContent = editingMessageContent,
+                                    chatScreenGestureConsumed = chatScreenGestureConsumed,
+                                    onChatScreenGestureConsumed = onChatScreenGestureConsumedChange,
+                                    currentDrag = currentDrag,
+                                    onCurrentDragChange = onCurrentDragChange,
+                                    verticalDrag = verticalDrag,
+                                    onVerticalDragChange = onVerticalDragChange,
+                                    dragThreshold = dragThreshold,
+                                    scrollState = scrollState,
+                                    autoScrollToBottom = autoScrollToBottom,
+                                    onAutoScrollToBottomChange = onAutoScrollToBottomChange,
+                                    coroutineScope = coroutineScope,
+                                    chatHistories = chatHistories,
+                                    currentChatId = currentChatId ?: "",
+                                    chatHeaderTransparent = chatHeaderTransparent,
+                                    chatHeaderHistoryIconColor = chatHeaderHistoryIconColor,
+                                    chatHeaderPipIconColor = chatHeaderPipIconColor,
+                                    chatHeaderOverlayMode = chatHeaderOverlayMode,
+                                    chatStyle = chatStyle, // Pass chat style
+                                    historyListState = historyListState,
+                                    onSwitchCharacter = { characterId ->
+                                        coroutineScope.launch {
+                                            characterCardManager.setActiveCharacterCard(characterId)
+                                        }
+                                    },
+                                    chatAreaHorizontalPadding = chatAreaHorizontalPadding
+                            )
+                        }
 
                         ChatSettingsBar(
                                 modifier = Modifier.align(Alignment.BottomEnd),
