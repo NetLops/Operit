@@ -592,7 +592,7 @@ val actualViewModel: ChatViewModel = viewModel ?: viewModel { ChatViewModel(cont
                         if (chatHistory.isEmpty()) {
                             BentoGridScreen(
                                 viewModel = actualViewModel,
-                                onNavigateToHistory = { actualViewModel.showChatHistorySelector() },
+                                onNavigateToHistory = { actualViewModel.showChatHistorySelector(true) },
                                 onNavigateToInspiration = { /* TODO: Navigate to inspiration */ }
                             )
                         } else {
