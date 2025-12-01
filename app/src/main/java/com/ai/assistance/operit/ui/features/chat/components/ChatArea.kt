@@ -427,6 +427,34 @@ private fun MessageItem(
                         },
                         modifier = Modifier.height(40.dp)
                 )
+                
+                // Edit and Resend (for user messages)
+                if (message.sender == "user") {
+                    DropdownMenuItem(
+                            text = {
+                                Text(
+                                        stringResource(id = R.string.edit_and_resend),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontSize = 14.sp
+                                )
+                            },
+                            onClick = {
+                                onSelectMessageToEdit?.invoke(index, message, "user")
+                                showContextMenu = false
+                            },
+                            leadingIcon = {
+                                Icon(
+                                        imageVector = Icons.Default.Edit,
+                                        contentDescription =
+                                                stringResource(id = R.string.edit_and_resend),
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(18.dp)
+                                )
+                            },
+                            modifier = Modifier.height(40.dp)
+                    )
+                }
+                
                 if (message.sender == "ai") {
                     // 修改记忆选项
                     DropdownMenuItem(
